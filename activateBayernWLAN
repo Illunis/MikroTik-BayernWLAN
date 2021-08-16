@@ -1,0 +1,16 @@
+:global BayernWLANIP;
+:local newIP [/ip address get [find interface="BayernWLAN"] address];
+
+:if ($newIP != $BayernWLANIP) do={
+    /log info "BayernWLAN ip address changed trying to activate Internet...";
+    :local result [/tool fetch url="https://10.175.177.131/api/v4/login\?loginProfile=6&accessType=termsOnly" mode=https check-certificate=no as-value output=user];
+    :if ($result->"status" = "finished") do={
+        :if ($result->"data"~".*\"success\":true.*") do={
+            /log info "... success! Internet should be activated";
+            :global BayernWLANIP $newIP;
+        } else={
+            /log info "...failed.";
+        }
+    }
+}
+
